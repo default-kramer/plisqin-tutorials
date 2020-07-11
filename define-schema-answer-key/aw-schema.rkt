@@ -690,30 +690,28 @@
 
 ;(aw:show-table task-3)
 
-(define task-4
-  (from prd Product
+(define (sales-report first-half)
+  (from x first-half
         (limit 5)
-        (select (ProductNumber prd))
-        (select (SubcategoryName prd))
-        (join detailsG (DetailsG prd))
+        (join detailsG (DetailsG x))
         (select (>> (round (sum (LineTotal detailsG)) 2)
                     #:as 'TotalSales))
         (select (>> (sum (OrderQty detailsG))
                     #:as 'TotalQtySold))
         (order-by 'desc (sum (LineTotal detailsG)))))
+
+(define task-4
+  (sales-report
+   (from prd Product
+         (select (ProductNumber prd))
+         (select (SubcategoryName prd)))))
 
 ;(aw:show-table task-4)
 
 (define task-5
-  (from subcat ProductSubcategory
-        (limit 5)
-        (select (SubcategoryName subcat))
-        (select (CategoryName subcat))
-        (join detailsG (DetailsG subcat))
-        (select (>> (round (sum (LineTotal detailsG)) 2)
-                    #:as 'TotalSales))
-        (select (>> (sum (OrderQty detailsG))
-                    #:as 'TotalQtySold))
-        (order-by 'desc (sum (LineTotal detailsG)))))
+  (sales-report
+   (from subcat ProductSubcategory
+         (select (SubcategoryName subcat))
+         (select (CategoryName subcat)))))
 
 ;(aw:show-table task-5)
