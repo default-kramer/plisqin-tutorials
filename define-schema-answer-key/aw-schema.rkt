@@ -234,6 +234,10 @@
          #:property
          [CategoryName
           (CategoryName (ProductSubcategory this))]
+         [HasSales?
+          (exists (from dtl SalesOrderDetail
+                        (where (.= (ProductID dtl)
+                                   (ProductID this)))))]
          [ProductName
           (Name this)]
          [SubcategoryName
@@ -652,3 +656,14 @@
         (select (CategoryName prd))))
 
 ;(aw:show-table task-2)
+
+(define task-3
+  (from prd Product
+        (limit 5)
+        (select (ProductName prd))
+        (select (ProductNumber prd))
+        (select (SubcategoryName prd))
+        (select (CategoryName prd))
+        (where (HasSales? prd))))
+
+;(aw:show-table task-3)
