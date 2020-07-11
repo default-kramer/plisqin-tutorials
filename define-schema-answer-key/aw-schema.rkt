@@ -230,7 +230,10 @@
          [ModifiedDate #:type Datetime? #:null no]
          [Name #:type String? #:null no]
          [ProductCategoryID #:type Number? #:null no]
-         [rowguid #:null no])
+         [rowguid #:null no]
+         #:property
+         [CategoryName
+          (Name this)])
   (table ProductCostHistory
          #:column
          [EndDate #:type Datetime? #:null yes]
@@ -314,7 +317,17 @@
          [Name #:type String? #:null no]
          [ProductCategoryID #:type Number? #:null no]
          [ProductSubcategoryID #:type Number? #:null no]
-         [rowguid #:null no])
+         [rowguid #:null no]
+         #:has-one
+         [ProductCategory
+          (join cat ProductCategory
+                (join-on (.= (ProductCategoryID cat)
+                             (?? (ProductCategoryID this) /void))))]
+         #:property
+         [CategoryName
+          (CategoryName (ProductCategory this))]
+         [SubcategoryName
+          (Name this)])
   (table ScrapReason
          #:column
          [ModifiedDate #:type Datetime? #:null no]
@@ -607,3 +620,12 @@
          [Name #:type String? #:null no]
          [rowguid #:null no]
          [SalesPersonID #:type Number? #:null yes]))
+
+
+(define task-1
+  (from subcat ProductSubcategory
+        (limit 5)
+        (select (SubcategoryName subcat))
+        (select (CategoryName subcat))))
+
+;(aw:show-table task-1)
