@@ -630,7 +630,15 @@
          [rowguid #:null no]
          [SalesLastYear #:type Number? #:null no]
          [SalesYTD #:type Number? #:null no]
-         [TerritoryID #:type Number? #:null no])
+         [TerritoryID #:type Number? #:null no]
+         #:has-group
+         [DetailsG
+          (join detailsG SalesOrderDetail
+                (join-type 'left)
+                (join soh (SalesOrderHeader detailsG))
+                (group-by (TerritoryID soh))
+                (join-on (.= (?? (TerritoryID soh) /void)
+                             (?? (TerritoryID this) /void))))])
   (table SalesTerritoryHistory
          #:column
          [BusinessEntityID #:type Number? #:null no]
@@ -758,3 +766,10 @@
          (select (CategoryName cat)))))
 
 ;(aw:show-table extra-credit-2.1)
+
+(define extra-credit-2.2
+  (sales-report
+   (from terr SalesTerritory
+         (select (Name terr)))))
+
+;(aw:show-table extra-credit-2.2)
