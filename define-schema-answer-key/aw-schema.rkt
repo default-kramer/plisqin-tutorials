@@ -535,9 +535,15 @@
           (join prd Product
                 (join-on (.= (ProductID prd)
                              (?? (ProductID this) /void))))]
+         [SalesOrderHeader
+          (join soh SalesOrderHeader
+                (join-on (.= (SalesOrderID soh)
+                             (?? (SalesOrderID this) /void))))]
          #:property
          [ProductSubcategoryID
-          (ProductSubcategoryID (Product this))])
+          (ProductSubcategoryID (Product this))]
+         [OrderDate
+          (OrderDate (SalesOrderHeader this))])
   (table SalesOrderHeader
          #:column
          [AccountNumber #:type String? #:null yes]
@@ -699,14 +705,11 @@
               ; Like queries, joins are also appendable.
               ; The following clauses are appended to the join
               ; that (DetailsG x) returned:
-              (join soh SalesOrderHeader
-                    (join-on (.= (SalesOrderID soh)
-                                 (SalesOrderID detailsG))))
               (when start-date
-                (where (.>= (OrderDate soh)
+                (where (.>= (OrderDate detailsG)
                             start-date)))
               (when end-date
-                (where (.< (OrderDate soh)
+                (where (.< (OrderDate detailsG)
                            end-date))))
         (select (>> (round (sum (LineTotal detailsG)) 2)
                     #:as 'TotalSales))
