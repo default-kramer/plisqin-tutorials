@@ -257,7 +257,16 @@
          [rowguid #:null no]
          #:property
          [CategoryName
-          (Name this)])
+          (Name this)]
+         #:has-group
+         [DetailsG
+          (join detailsG SalesOrderDetail
+                (join-type 'left)
+                (join prd (Product detailsG))
+                (join subcat (ProductSubcategory prd))
+                (group-by (ProductCategoryID subcat))
+                (join-on (.= (?? (ProductCategoryID subcat) /void)
+                             (?? (ProductCategoryID this) /void))))])
   (table ProductCostHistory
          #:column
          [EndDate #:type Datetime? #:null yes]
@@ -742,3 +751,10 @@
          (select (CategoryName subcat)))))
 
 ;(aw:show-table task-7)
+
+(define extra-credit-2.1
+  (sales-report
+   (from cat ProductCategory
+         (select (CategoryName cat)))))
+
+;(aw:show-table extra-credit-2.1)
