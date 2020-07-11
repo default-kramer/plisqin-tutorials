@@ -224,7 +224,20 @@
          [StandardCost #:type Number? #:null no]
          [Style #:type String? #:null yes]
          [Weight #:type Number? #:null yes]
-         [WeightUnitMeasureCode #:type String? #:null yes])
+         [WeightUnitMeasureCode #:type String? #:null yes]
+         #:has-one
+         [ProductSubcategory
+          (join subcat ProductSubcategory
+                (join-type 'left)
+                (join-on (.= (ProductSubcategoryID subcat)
+                             (?? (ProductSubcategoryID this) /void))))]
+         #:property
+         [CategoryName
+          (CategoryName (ProductSubcategory this))]
+         [ProductName
+          (Name this)]
+         [SubcategoryName
+          (SubcategoryName (ProductSubcategory this))])
   (table ProductCategory
          #:column
          [ModifiedDate #:type Datetime? #:null no]
@@ -629,3 +642,13 @@
         (select (CategoryName subcat))))
 
 ;(aw:show-table task-1)
+
+(define task-2
+  (from prd Product
+        (limit 5)
+        (select (ProductName prd))
+        (select (ProductNumber prd))
+        (select (SubcategoryName prd))
+        (select (CategoryName prd))))
+
+;(aw:show-table task-2)
