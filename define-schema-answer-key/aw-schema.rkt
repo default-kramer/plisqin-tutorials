@@ -347,6 +347,13 @@
           (join cat ProductCategory
                 (join-on (.= (ProductCategoryID cat)
                              (?? (ProductCategoryID this) /void))))]
+         #:has-group
+         [DetailsG
+          (join detailsG SalesOrderDetail
+                (join-type 'left)
+                (group-by (ProductSubcategoryID detailsG))
+                (join-on (.= (?? (ProductSubcategoryID detailsG) /void)
+                             (?? (ProductSubcategoryID this) /void))))]
          #:property
          [CategoryName
           (CategoryName (ProductCategory this))]
@@ -522,7 +529,15 @@
          [SalesOrderID #:type Number? #:null no]
          [SpecialOfferID #:type Number? #:null no]
          [UnitPrice #:type Number? #:null no]
-         [UnitPriceDiscount #:type Number? #:null no])
+         [UnitPriceDiscount #:type Number? #:null no]
+         #:has-one
+         [Product
+          (join prd Product
+                (join-on (.= (ProductID prd)
+                             (?? (ProductID this) /void))))]
+         #:property
+         [ProductSubcategoryID
+          (ProductSubcategoryID (Product this))])
   (table SalesOrderHeader
          #:column
          [AccountNumber #:type String? #:null yes]
@@ -688,3 +703,17 @@
         (order-by 'desc (sum (LineTotal detailsG)))))
 
 ;(aw:show-table task-4)
+
+(define task-5
+  (from subcat ProductSubcategory
+        (limit 5)
+        (select (SubcategoryName subcat))
+        (select (CategoryName subcat))
+        (join detailsG (DetailsG subcat))
+        (select (>> (round (sum (LineTotal detailsG)) 2)
+                    #:as 'TotalSales))
+        (select (>> (sum (OrderQty detailsG))
+                    #:as 'TotalQtySold))
+        (order-by 'desc (sum (LineTotal detailsG)))))
+
+;(aw:show-table task-5)
