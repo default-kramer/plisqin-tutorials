@@ -690,10 +690,24 @@
 
 ;(aw:show-table task-3)
 
-(define (sales-report first-half)
+(define (sales-report first-half
+                      #:start-date [start-date #f]
+                      #:end-date [end-date #f])
   (from x first-half
         (limit 5)
-        (join detailsG (DetailsG x))
+        (join detailsG (DetailsG x)
+              ; Like queries, joins are also appendable.
+              ; The following clauses are appended to the join
+              ; that (DetailsG x) returned:
+              (join soh SalesOrderHeader
+                    (join-on (.= (SalesOrderID soh)
+                                 (SalesOrderID detailsG))))
+              (when start-date
+                (where (.>= (OrderDate soh)
+                            start-date)))
+              (when end-date
+                (where (.< (OrderDate soh)
+                           end-date))))
         (select (>> (round (sum (LineTotal detailsG)) 2)
                     #:as 'TotalSales))
         (select (>> (sum (OrderQty detailsG))
@@ -715,3 +729,13 @@
          (select (CategoryName subcat)))))
 
 ;(aw:show-table task-5)
+
+(define task-7
+  (sales-report
+   #:start-date (val "2012-01-01" Datetime?)
+   #:end-date (val "2013-01-01" Datetime?)
+   (from subcat ProductSubcategory
+         (select (SubcategoryName subcat))
+         (select (CategoryName subcat)))))
+
+;(aw:show-table task-7)
