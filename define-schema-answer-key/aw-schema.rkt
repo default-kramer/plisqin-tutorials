@@ -596,7 +596,15 @@
          [SalesLastYear #:type Number? #:null no]
          [SalesQuota #:type Number? #:null yes]
          [SalesYTD #:type Number? #:null no]
-         [TerritoryID #:type Number? #:null yes])
+         [TerritoryID #:type Number? #:null yes]
+         #:has-group
+         [DetailsG
+          (join detailsG SalesOrderDetail
+                (join-type 'left)
+                (join soh (SalesOrderHeader detailsG))
+                (group-by (SalesPersonID soh))
+                (join-on (.= (?? (SalesPersonID soh) /void)
+                             (?? (BusinessEntityID this) /void))))])
   (table SalesPersonQuotaHistory
          #:column
          [BusinessEntityID #:type Number? #:null no]
@@ -773,3 +781,14 @@
          (select (Name terr)))))
 
 ;(aw:show-table extra-credit-2.2)
+
+(define extra-credit-2.3
+  (sales-report
+   (from sp SalesPerson
+         (join person Person
+               (join-on (.= (BusinessEntityID person)
+                            (BusinessEntityID sp))))
+         (select (FirstName person))
+         (select (LastName person)))))
+
+;(aw:show-table extra-credit-2.3)
