@@ -231,6 +231,13 @@
                 (join-type 'left)
                 (join-on (.= (ProductSubcategoryID subcat)
                              (?? (ProductSubcategoryID this) /void))))]
+         #:has-group
+         [DetailsG
+          (join detailsG SalesOrderDetail
+                (join-type 'left)
+                (group-by (ProductID detailsG))
+                (join-on (.= (ProductID detailsG)
+                             (?? (ProductID this) /void))))]
          #:property
          [CategoryName
           (CategoryName (ProductSubcategory this))]
@@ -667,3 +674,17 @@
         (where (HasSales? prd))))
 
 ;(aw:show-table task-3)
+
+(define task-4
+  (from prd Product
+        (limit 5)
+        (select (ProductNumber prd))
+        (select (SubcategoryName prd))
+        (join detailsG (DetailsG prd))
+        (select (>> (round (sum (LineTotal detailsG)) 2)
+                    #:as 'TotalSales))
+        (select (>> (sum (OrderQty detailsG))
+                    #:as 'TotalQtySold))
+        (order-by 'desc (sum (LineTotal detailsG)))))
+
+;(aw:show-table task-4)
